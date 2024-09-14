@@ -7,6 +7,7 @@ require (
 	github.com/go-faster/errors v0.7.1 // indirect
 	github.com/go-faster/jx v1.1.0 // indirect
 	github.com/go-faster/xor v1.0.0 // indirect
+	github.com/gotd/contrib v0.20.0 // indirect
 	github.com/gotd/ige v0.2.2 // indirect
 	github.com/gotd/neo v0.1.5 // indirect
 	github.com/gotd/td v0.109.0 // indirect
@@ -23,6 +24,7 @@ require (
 	golang.org/x/net v0.29.0 // indirect
 	golang.org/x/sync v0.8.0 // indirect
 	golang.org/x/sys v0.25.0 // indirect
+	golang.org/x/time v0.6.0 // indirect
 	nhooyr.io/websocket v1.8.11 // indirect
 	rsc.io/qr v0.2.0 // indirect
 )
