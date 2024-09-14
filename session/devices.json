@@ -1,0 +1,30 @@
+{
+    "tdesktop": {
+        "api_id": 2040,
+        "api_hash": "b18441a1ff607e10a989891a5462e627",
+        "system_versions": [
+            "Windows 11",
+            "Windows 10"
+        ],
+        "lang_code": "en",
+        "system_lang_code": "en-US",
+        "lang_pack": "tdesktop",
+        "app_version": "5.0.1 x64",
+        "device_models": [
+            "XPS 13 9305",
+            "XPS 13 9370",
+            "XPS 15 9550",
+            "XPS 15 9560",
+            "XPS 630i",
+            "XPS 730",
+            "XPS 730X",
+            "XPS 8300",
+            "XPS 8700",
+            "XPS 8940",
+            "XPS A2420",
+            "XPS L501X",
+            "XPS L701X",
+            "XPS M1530"
+        ]
+    }
+}
