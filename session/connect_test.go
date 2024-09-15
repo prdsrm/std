@@ -7,6 +7,8 @@ import (
 	"testing"
 
 	"github.com/gotd/td/telegram"
+
+	"github.com/prdsrm/std/bot"
 )
 
 func callSelf(ctx context.Context, client *telegram.Client) error {
@@ -15,6 +17,14 @@ func callSelf(ctx context.Context, client *telegram.Client) error {
 		return err
 	}
 	log.Println("Self", self.ID, self.Username)
+	automation, err := bot.NewAutomation(ctx, client, "tgdb_bot")
+	if err != nil {
+		return err
+	}
+	err = automation.SendTextMessage("/start")
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
