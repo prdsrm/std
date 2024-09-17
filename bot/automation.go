@@ -10,16 +10,17 @@ import (
 )
 
 type Automation struct {
-	ctx       context.Context
-	client    *tg.Client
-	Username  string
-	InputPeer tg.InputPeerClass
+	ctx        context.Context
+	client     *tg.Client
+	dispatcher tg.UpdateDispatcher
+	Username   string
+	InputPeer  tg.InputPeerClass
 }
 
 // NewAutomation creates a new `Automation` object.
 // It requires an username, since all (official) Telegram Bot have an username.
-func NewAutomation(ctx context.Context, client *telegram.Client, username string) (*Automation, error) {
-	automation := Automation{Username: username, ctx: ctx, client: client.API()}
+func NewAutomation(ctx context.Context, client *telegram.Client, dispatcher tg.UpdateDispatcher, username string) (*Automation, error) {
+	automation := Automation{Username: username, ctx: ctx, client: client.API(), dispatcher: dispatcher}
 	sender := message.NewSender(automation.client)
 	builder := sender.Resolve(automation.Username)
 	inputPeer, err := builder.AsInputPeer(ctx)
@@ -46,5 +47,35 @@ func (a *Automation) SendCallbackData(msgID int, callbackData string) (*tg.Messa
 		Peer:  a.InputPeer,
 		MsgID: msgID,
 		Data:  []byte(callbackData),
+	})
+}
+
+func (a *Automation) SetupMessageMonitoring(messagesChan chan *tg.Message) {
+	a.dispatcher.OnEditMessage(func(ctx context.Context, e tg.Entities, u *tg.UpdateEditMessage) error {
+		m, ok := u.Message.(*tg.Message)
+		if !ok || m.Out {
+			// Outgoing message, not interesting.
+			return nil
+		}
+		messagesChan <- m
+		return nil
+	})
+	a.dispatcher.OnNewMessage(func(ctx context.Context, entities tg.Entities, u *tg.UpdateNewMessage) error {
+		m, ok := u.Message.(*tg.Message)
+		if !ok || m.Out {
+			// Outgoing message, not interesting.
+			return nil
+		}
+		messagesChan <- m
+		return nil
+	})
+	a.dispatcher.OnNewChannelMessage(func(ctx context.Context, entities tg.Entities, u *tg.UpdateNewChannelMessage) error {
+		m, ok := u.Message.(*tg.Message)
+		if !ok || m.Out {
+			// Outgoing message, not interesting.
+			return nil
+		}
+		messagesChan <- m
+		return nil
 	})
 }

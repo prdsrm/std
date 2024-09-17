@@ -7,23 +7,31 @@ import (
 	"testing"
 
 	"github.com/gotd/td/telegram"
+	"github.com/gotd/td/tg"
 
 	"github.com/prdsrm/std/bot"
 )
 
-func callSelf(ctx context.Context, client *telegram.Client) error {
+func callSelf(ctx context.Context, client *telegram.Client, dispatcher tg.UpdateDispatcher, options telegram.Options) error {
 	self, err := client.Self(ctx)
 	if err != nil {
 		return err
 	}
 	log.Println("Self", self.ID, self.Username)
-	automation, err := bot.NewAutomation(ctx, client, "tgdb_bot")
+	automation, err := bot.NewAutomation(ctx, client, dispatcher, "tgdb_bot")
 	if err != nil {
 		return err
 	}
 	err = automation.SendTextMessage("/start")
 	if err != nil {
 		return err
+	}
+	messagesChan := make(chan *tg.Message)
+	automation.SetupMessageMonitoring(messagesChan)
+	for {
+		msg := <-messagesChan
+		log.Println("Received message: ", msg.Message)
+		break
 	}
 	return nil
 }
