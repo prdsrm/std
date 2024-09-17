@@ -80,7 +80,7 @@ func newResolver(proxyConnStr string) (dcs.Resolver, error) {
 	return resolver, nil
 }
 
-func Connect(f func(ctx context.Context, client *telegram.Client) error, phone string, password string, device telegram.DeviceConfig, apiID int, apiHash string, sessionString string, proxy string) error {
+func Connect(f func(ctx context.Context, client *telegram.Client, dispatcher tg.UpdateDispatcher, options telegram.Options) error, phone string, password string, device telegram.DeviceConfig, apiID int, apiHash string, sessionString string, proxy string) error {
 	data, err := session.TelethonSession(sessionString)
 	if err != nil {
 		return err
@@ -140,7 +140,7 @@ func Connect(f func(ctx context.Context, client *telegram.Client) error, phone s
 					return fmt.Errorf("could not authenticate: %w", err)
 				}
 			}
-			if err := f(ctx, client); err != nil {
+			if err := f(ctx, client, dispatcher, options); err != nil {
 				return err
 			}
 			return nil
