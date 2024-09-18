@@ -3,6 +3,7 @@ package bot
 import (
 	"context"
 	"fmt"
+	"math/rand"
 
 	"github.com/gotd/td/telegram"
 	"github.com/gotd/td/telegram/message"
@@ -29,6 +30,23 @@ func NewAutomation(ctx context.Context, client *telegram.Client, dispatcher tg.U
 	}
 	automation.InputPeer = inputPeer
 	return &automation, nil
+}
+
+// SendStartMessageWithParams will start a chat with a bot with the appropriate parameters.
+// For instance, if you receive the link https://t.me/randombot?start=hello, the "hello" parameter
+// will be sent as well.
+func (a *Automation) SendStartMessageWithParams(params string) error {
+	randomID := rand.Int63()
+	_, err := a.client.MessagesStartBot(a.ctx, &tg.MessagesStartBotRequest{
+		Bot:        &tg.InputUser{UserID: a.InputPeer.(*tg.InputPeerUser).UserID, AccessHash: a.InputPeer.(*tg.InputPeerUser).AccessHash},
+		Peer:       a.InputPeer,
+		RandomID:   randomID,
+		StartParam: params,
+	})
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func (a *Automation) SendTextMessage(text string) error {
