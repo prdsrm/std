@@ -10,6 +10,7 @@ import (
 	"github.com/gotd/td/tg"
 
 	"github.com/prdsrm/std/bot"
+	"github.com/prdsrm/std/messages"
 )
 
 func callSelf(ctx context.Context, client *telegram.Client, dispatcher tg.UpdateDispatcher, options telegram.Options) error {
@@ -36,9 +37,9 @@ func callSelf(ctx context.Context, client *telegram.Client, dispatcher tg.Update
 	return nil
 }
 
-func defaultHandler(ctx bot.AutomationContext) error {
+func defaultHandler(ctx messages.MonitoringContext) error {
 	log.Println(ctx.GetMessage().Message)
-	return bot.EndConversation
+	return messages.EndConversation
 }
 
 func TestConnect(t *testing.T) {
