@@ -1,6 +1,9 @@
 package utils
 
 import (
+	"strings"
+	"unicode"
+
 	"github.com/gotd/td/tg"
 )
 
@@ -16,4 +19,15 @@ func GetIDFromPeerClass(peer tg.PeerClass) int64 {
 	default:
 		return 0
 	}
+}
+
+func RemoveSpacesAndNewlines(s string) string {
+	// Use strings.Map to remove non-printable characters
+	cleanText := strings.Map(func(r rune) rune {
+		if r <= unicode.MaxASCII {
+			return r
+		}
+		return -1
+	}, s)
+	return strings.Join(strings.Fields(cleanText), "")
 }
