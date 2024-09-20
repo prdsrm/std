@@ -18,7 +18,7 @@ func callSelf(ctx context.Context, client *telegram.Client, dispatcher tg.Update
 		return err
 	}
 	log.Println("Self", self.ID, self.Username)
-	automation, err := bot.NewAutomation(ctx, client, dispatcher, "tgdb_bot")
+	automation, err := bot.NewAutomation(ctx, client, dispatcher, "tgdb_bot", false)
 	if err != nil {
 		return err
 	}
@@ -28,12 +28,17 @@ func callSelf(ctx context.Context, client *telegram.Client, dispatcher tg.Update
 	}
 	messagesChan := make(chan *tg.Message)
 	automation.SetupMessageMonitoring(messagesChan)
-	for {
-		msg := <-messagesChan
-		log.Println("Received message: ", msg.Message)
-		break
+	automation.Handle(".*", defaultHandler)
+	err = automation.Listen()
+	if err != nil {
+		return err
 	}
 	return nil
+}
+
+func defaultHandler(ctx bot.AutomationContext) error {
+	log.Println(ctx.GetMessage().Message)
+	return bot.EndConversation
 }
 
 func TestConnect(t *testing.T) {
