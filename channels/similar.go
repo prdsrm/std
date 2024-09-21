@@ -4,11 +4,17 @@ import (
 	"context"
 
 	"github.com/gotd/td/telegram"
+	"github.com/gotd/td/telegram/message"
 	"github.com/gotd/td/tg"
 )
 
-func GetSimilarChannels(ctx context.Context, client *telegram.Client, channelID int64, channelUsername string) ([]*tg.Channel, error) {
-	var inputChannel tg.InputChannelClass
+func GetSimilarChannels(ctx context.Context, client *telegram.Client, channelUsername string) ([]*tg.Channel, error) {
+	sender := message.NewSender(client.API())
+	builder := sender.Resolve(channelUsername)
+	inputChannel, err := builder.AsInputChannelClass(ctx)
+	if err != nil {
+		return nil, err
+	}
 	msgs, err := client.API().ChannelsGetChannelRecommendations(ctx, &tg.ChannelsGetChannelRecommendationsRequest{
 		Channel: inputChannel,
 	})

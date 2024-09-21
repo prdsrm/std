@@ -2,6 +2,7 @@ package session
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"os"
 	"testing"
@@ -10,6 +11,7 @@ import (
 	"github.com/gotd/td/tg"
 
 	"github.com/prdsrm/std/bot"
+	"github.com/prdsrm/std/channels"
 	"github.com/prdsrm/std/messages"
 )
 
@@ -33,6 +35,13 @@ func callSelf(ctx context.Context, client *telegram.Client, dispatcher tg.Update
 	err = automation.Listen()
 	if err != nil {
 		return err
+	}
+	channels, err := channels.GetSimilarChannels(ctx, client, "durov")
+	if err != nil {
+		return err
+	}
+	for _, channel := range channels {
+		fmt.Println("Channel: ", channel.ID, channel.Username)
 	}
 	return nil
 }
