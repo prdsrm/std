@@ -19,7 +19,7 @@ type Monitoring struct {
 }
 
 func NewMonitoring(dispatcher tg.UpdateDispatcher, id int64, strip bool) *Monitoring {
-	return &Monitoring{dispatcher: dispatcher, id: id, strip: false}
+	return &Monitoring{dispatcher: dispatcher, id: id, strip: strip}
 
 }
 
