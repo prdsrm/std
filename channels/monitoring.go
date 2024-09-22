@@ -21,7 +21,7 @@ type ChannelMonitoring struct {
 // NOTE: The strip parameter means that you want to remove special characters and spaces from
 // messages you will be parsing, because you don't need them, and, its easier to make regular
 // expressions this way.
-func NewChannelMonitoring(ctx context.Context, client *telegram.Client, id int64, username string, dispatcher tg.UpdateDispatcher, strip bool) (*ChannelMonitoring, error) {
+func NewChannelMonitoring(ctx context.Context, client *telegram.Client, username string, dispatcher tg.UpdateDispatcher, strip bool) (*ChannelMonitoring, error) {
 	sender := message.NewSender(client.API())
 	builder := sender.Resolve(username)
 	_, err := builder.Join(ctx)
@@ -29,6 +29,10 @@ func NewChannelMonitoring(ctx context.Context, client *telegram.Client, id int64
 		// NOTE: an error is returned if it's not a channel, so we don't need to check ourselves.
 		return nil, err
 	}
-	monitoring := messages.NewMonitoring(dispatcher, id, strip)
+	channel, err := builder.AsInputChannel(ctx)
+	if err != nil {
+		return nil, err
+	}
+	monitoring := messages.NewMonitoring(dispatcher, channel.ChannelID, strip)
 	return &ChannelMonitoring{Monitoring: monitoring}, nil
 }

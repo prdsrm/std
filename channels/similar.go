@@ -30,8 +30,3 @@ func GetSimilarChannels(ctx context.Context, client *telegram.Client, channelUse
 	}
 	return channels, nil
 }
-
-// TODO: export the channels to maltego, and set multiple backends for the Maltego definition:
-// - Byte(Default)
-// - Write to File
-// func ExportChannelsToMaltego(mainChannel *tg.Channel, subChannels []*tg.Channel) ([]byte, error) {}
