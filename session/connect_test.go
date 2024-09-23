@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"regexp"
 	"testing"
 
 	"github.com/gotd/td/telegram"
@@ -25,13 +26,11 @@ func callSelf(ctx context.Context, client *telegram.Client, dispatcher tg.Update
 	if err != nil {
 		return err
 	}
-	err = automation.SendTextMessage("/start")
+	err = automation.SendTextMessage("/resolve 7513073974")
 	if err != nil {
 		return err
 	}
-	messagesChan := make(chan *tg.Message)
-	automation.SetupMessageMonitoring(messagesChan)
-	automation.Handle(".*", defaultHandler)
+	automation.Handle(regexp.MustCompile(".*"), defaultHandler)
 	err = automation.Listen()
 	if err != nil {
 		return err

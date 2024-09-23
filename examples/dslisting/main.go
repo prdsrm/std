@@ -30,8 +30,7 @@ type DSNewPair struct {
 	PooledSOLUSD string
 }
 
-var expr = `(?m)NewPaironSolana:.+\/(SOL).+Tokenaddress:([1-9A-HJ-NP-Za-km-z]{32,44})PriceUSD:\$([0-9.,]+)Price:([0-9.,]+)SOLFDV:\$([0-9.,]+)Totalliquidity:\$([0-9.,]+)Pooled($|)([A-Z]+):([0-9.,]+)PooledSOL:([0-9.,]+)\(\$([0-9.,]+)\)WARNING:buyingnewpairsisextremelyrisky,pleasereadpinnedmessagebeforeproceeding!`
-var re = regexp.MustCompile(expr)
+var re = regexp.MustCompile(`(?m)NewPaironSolana:.+\/(SOL).+Tokenaddress:([1-9A-HJ-NP-Za-km-z]{32,44})PriceUSD:\$([0-9.,]+)Price:([0-9.,]+)SOLFDV:\$([0-9.,]+)Totalliquidity:\$([0-9.,]+)Pooled($|)([A-Z]+):([0-9.,]+)PooledSOL:([0-9.,]+)\(\$([0-9.,]+)\)WARNING:buyingnewpairsisextremelyrisky,pleasereadpinnedmessagebeforeproceeding!`)
 var counter = 0
 
 func ParseDSNewPair(message messages.MonitoringContext) error {
@@ -81,7 +80,7 @@ func listen(ctx context.Context, client *telegram.Client, dispatcher tg.UpdateDi
 	if err != nil {
 		return err
 	}
-	monitoring.Handle(expr, ParseDSNewPair)
+	monitoring.Handle(re, ParseDSNewPair)
 	log.Println("Starting to listen for new dexscreener listings")
 	err = monitoring.Listen()
 	if err != nil {
