@@ -31,7 +31,7 @@ func NewAutomation(ctx context.Context, client *telegram.Client, dispatcher tg.U
 	}
 	automation := Automation{Username: username, ctx: ctx, client: client.API(), InputPeer: inputPeer}
 	id := inputPeer.(*tg.InputPeerUser).UserID
-	monitoring := messages.NewMonitoring(dispatcher, id, false)
+	monitoring := messages.NewMonitoring(dispatcher, id, strip)
 	automation.Monitoring = monitoring
 	return &automation, nil
 }

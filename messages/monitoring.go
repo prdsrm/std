@@ -70,12 +70,8 @@ type RouteEntry struct {
 	Handler func(ctx MonitoringContext) error
 }
 
-func (m *Monitoring) Handle(expr string, handler func(ctx MonitoringContext) error) {
-	regex, err := regexp.Compile(expr)
-	if err != nil {
-		log.Fatalf("Regex expression: `%s` is invalid and failed to compile: %s\n", expr, err)
-	}
-	m.routes = append(m.routes, RouteEntry{Regex: regex, Handler: handler})
+func (m *Monitoring) Handle(re *regexp.Regexp, handler func(ctx MonitoringContext) error) {
+	m.routes = append(m.routes, RouteEntry{Regex: re, Handler: handler})
 }
 
 func (m *Monitoring) Listen() error {
@@ -105,6 +101,7 @@ func (m *Monitoring) Listen() error {
 					}
 					break
 				}
+				log.Println("Received message but it does not match with our filter: ", text)
 			}
 		}
 	}
