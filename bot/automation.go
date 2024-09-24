@@ -71,3 +71,13 @@ func (a *Automation) SendCallbackData(msgID int, callbackData string) (*tg.Messa
 		Data:  []byte(callbackData),
 	})
 }
+
+func (a *Automation) ReplyToMessage(msgID int, text string) error {
+	sender := message.NewSender(a.client)
+	builder := sender.Resolve(a.Username)
+	_, err := builder.Reply(msgID).Text(a.ctx, text)
+	if err != nil {
+		return fmt.Errorf("couldn't send message to user: %s: %w.", a.Username, err)
+	}
+	return nil
+}
