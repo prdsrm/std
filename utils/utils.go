@@ -1,6 +1,10 @@
 package utils
 
 import (
+	"errors"
+	"fmt"
+	"net/url"
+	"strconv"
 	"strings"
 	"unicode"
 
@@ -18,6 +22,39 @@ func GetIDFromPeerClass(peer tg.PeerClass) int64 {
 		return peer.ChatID
 	default:
 		return 0
+	}
+}
+
+type MessageDeepLink struct {
+	Username   string
+	MessageID  int
+	Parameters string
+}
+
+func ParseMessageDeepLink(link string) (MessageDeepLink, error) {
+	parsedURL, err := url.Parse(link)
+	if err != nil {
+		return MessageDeepLink{}, fmt.Errorf("Couldn't parse message deep link %s: %w", link, err)
+	}
+	paths := strings.Split(parsedURL.Path, "/")
+	if len(paths) >= 3 {
+		username := paths[1]
+		id, err := strconv.Atoi(paths[2])
+		if err != nil {
+			return MessageDeepLink{}, fmt.Errorf(
+				"Message ID isn't an integer %s: %w",
+				paths[2],
+				err,
+			)
+		}
+		return MessageDeepLink{Username: username, MessageID: id}, nil
+	} else if len(paths) == 2 {
+		username := paths[1]
+		values := parsedURL.Query()
+		startParams := values["start"][0]
+		return MessageDeepLink{Username: username, MessageID: 0, Parameters: startParams}, nil
+	} else {
+		return MessageDeepLink{}, errors.New("can't parse")
 	}
 }
 

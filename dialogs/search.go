@@ -45,3 +45,21 @@ func SearchTroughPeers(peers []tg.PeerClass, id int64) (*tg.PeerClass, bool) {
 	}
 	return nil, false
 }
+
+// removed the wrapper
+// taken from https://github.com/celestix/gotgproto
+func ArchiveChats(
+	ctx context.Context,
+	client *telegram.Client,
+	peers []tg.InputPeerClass,
+) (bool, error) {
+	var folderPeers = make([]tg.InputFolderPeer, len(peers))
+	for n, peer := range peers {
+		folderPeers[n] = tg.InputFolderPeer{
+			Peer:     peer,
+			FolderID: 1,
+		}
+	}
+	_, err := client.API().FoldersEditPeerFolders(ctx, folderPeers)
+	return err == nil, err
+}
