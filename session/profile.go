@@ -5,7 +5,6 @@ import (
 
 	"github.com/gotd/td/telegram"
 	"github.com/gotd/td/telegram/query"
-	"github.com/gotd/td/telegram/query/photos"
 	"github.com/gotd/td/tg"
 )
 
@@ -15,17 +14,17 @@ func DeleteProfilePictures(ctx context.Context, client *telegram.Client) error {
 	if err != nil {
 		return err
 	}
+	elems, err := query.NewQuery(client.API()).GetUserPhotos(self.AsInput()).Collect(ctx)
+	if err != nil {
+		return err
+	}
 	var inputPhotos []tg.InputPhotoClass
-	err = query.NewQuery(client.API()).GetUserPhotos(self.AsInput()).ForEach(ctx, func(ctx context.Context, elem photos.Elem) error {
+	for _, elem := range elems {
 		switch picture := elem.Photo.(type) {
 		case *tg.PhotoEmpty: // photoEmpty#2331b22d
 		case *tg.Photo: // photo#fb197a65
 			inputPhotos = append(inputPhotos, picture.AsInput())
 		}
-		return nil
-	})
-	if err != nil {
-		return err
 	}
 	_, err = client.API().PhotosDeletePhotos(ctx, inputPhotos)
 	if err != nil {
