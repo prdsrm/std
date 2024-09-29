@@ -139,7 +139,6 @@ func EncodeSessionToTelethonString(sessionData *session.Data) (string, error) {
 	} else {
 		list := dcs.Prod()
 		for _, option := range list.Options {
-			fmt.Println("Current DC: ", sessionData.DC, "Option: ", option)
 			if sessionData.DC == option.ID && !option.Ipv6 {
 				ipAddr = option.IPAddress
 				port = option.Port

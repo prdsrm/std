@@ -80,31 +80,44 @@ func newResolver(proxyConnStr string) (dcs.Resolver, error) {
 	return resolver, nil
 }
 
-func Connect(f func(ctx context.Context, client *telegram.Client, dispatcher tg.UpdateDispatcher, options telegram.Options) error, phone string, password string, device telegram.DeviceConfig, apiID int, apiHash string, sessionString string, proxy string) error {
-	data, err := session.TelethonSession(sessionString)
-	if err != nil {
-		return err
+func GetNewDefaultAuthConversator(phone string, password string) auth.Flow {
+	userAuthenticator := DefaultAuthConversator{PhoneNumber: phone, Passwd: password}
+	authOpt := auth.SendCodeOptions{}
+	// Authentication flow handles authentication process, like prompting for code and 2FA password.
+	flow := auth.NewFlow(userAuthenticator, authOpt)
+	return flow
+}
+
+func Connect(f func(ctx context.Context, client *telegram.Client, dispatcher tg.UpdateDispatcher, options telegram.Options) error, device telegram.DeviceConfig, apiID int, apiHash string, sessionString string, proxy string, flow auth.Flow) error {
+	storage := &MemorySession{}
+	// We only load the session if it isn't empty
+	if sessionString != "" {
+		loader := session.Loader{Storage: storage}
+		// Extracts session data from Telethon session string.
+		data, err := session.TelethonSession(sessionString)
+		if err != nil {
+			return err
+		}
+		// Save decoded Telethon session as gotd session.
+		if err := loader.Save(context.Background(), data); err != nil {
+			return err
+		}
 	}
+	// Load proxy
 	var resolver dcs.Resolver
+	var err error
 	if proxy != "" {
 		resolver, err = newResolver(proxy)
 		if err != nil {
 			return err
 		}
 	}
-	storage := &MemorySession{}
-	loader := session.Loader{Storage: storage}
-	// Save decoded Telethon session as gotd session.
-	if err := loader.Save(context.Background(), data); err != nil {
-		return err
-	}
+	// Finish setting up options
 	options := telegram.Options{
 		Resolver:       resolver,
 		SessionStorage: storage,
 		Device:         device,
 	}
-	userAuthenticator := DefaultAuthConversator{PhoneNumber: phone, Passwd: password}
-	authOpt := auth.SendCodeOptions{}
 	waiter := floodwait.NewWaiter()
 	// Dispatcher handles incoming updates.
 	dispatcher := tg.NewUpdateDispatcher()
@@ -121,37 +134,39 @@ func Connect(f func(ctx context.Context, client *telegram.Client, dispatcher tg.
 	}
 	options.UpdateHandler = gaps
 	client := telegram.NewClient(apiID, apiHash, options)
-	// Authentication flow handles authentication process, like prompting for code and 2FA password.
-	flow := auth.NewFlow(userAuthenticator, authOpt)
 
 	ctx := context.Background()
 	if err := waiter.Run(ctx, func(ctx context.Context) error {
 		// Spawning main goroutine.
-		if err := client.Run(ctx, func(ctx context.Context) error {
-			// Checking auth status.
-			status, err := client.Auth().Status(ctx)
-			if err != nil {
-				return err
+		return runClient(f, ctx, client, dispatcher, options, flow)
+	}); err != nil {
+		return err
+	}
+	return nil
+}
+
+func runClient(f func(ctx context.Context, client *telegram.Client, dispatcher tg.UpdateDispatcher, options telegram.Options) error, ctx context.Context, client *telegram.Client, dispatcher tg.UpdateDispatcher, options telegram.Options, flow auth.Flow) error {
+	if err := client.Run(ctx, func(ctx context.Context) error {
+		// Checking auth status.
+		status, err := client.Auth().Status(ctx)
+		if err != nil {
+			return err
+		}
+		// Can be already authenticated if we have valid session in
+		// session storage.
+		if !status.Authorized {
+			if err := client.Auth().IfNecessary(ctx, flow); err != nil {
+				return fmt.Errorf("could not authenticate: %w", err)
 			}
-			// Can be already authenticated if we have valid session in
-			// session storage.
-			if !status.Authorized {
-				if err := client.Auth().IfNecessary(ctx, flow); err != nil {
-					return fmt.Errorf("could not authenticate: %w", err)
-				}
-			}
-			if err := f(ctx, client, dispatcher, options); err != nil {
-				return err
-			}
-			return nil
-		}); err != nil {
+		}
+		if err := f(ctx, client, dispatcher, options); err != nil {
 			return err
 		}
 		return nil
 	}); err != nil {
 		return err
 	}
-	return err
+	return nil
 }
 
 var (

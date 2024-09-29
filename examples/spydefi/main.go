@@ -89,7 +89,8 @@ func main() {
 	phone := os.Getenv("PHONE_NUMBER")
 	password := os.Getenv("PASSWORD")
 	sessionString := os.Getenv("SESSION_STRING")
-	err := session.Connect(listen, phone, password, session.Windows(), 2040, "b18441a1ff607e10a989891a5462e627", sessionString, "")
+	flow := session.GetNewDefaultAuthConversator(phone, password)
+	err := session.Connect(listen, session.Windows(), 2040, "b18441a1ff607e10a989891a5462e627", sessionString, "", flow)
 	if err != nil {
 		log.Fatalln("can't connect: ", err)
 	}
