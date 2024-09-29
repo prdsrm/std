@@ -92,3 +92,26 @@ func AddReaction(ctx context.Context, client *telegram.Client, link string, emoj
 	}
 	return nil
 }
+
+// ForwardMessageFromPublicChannel forwards a message from a public channel thanks to the message deep link
+func ForwardMessageFromPublicChannel(ctx context.Context, client *telegram.Client, deepLink string, destinationChannelUsername string) error {
+	messageDeepLink, err := utils.ParseMessageDeepLink(deepLink)
+	if err != nil {
+		return err
+	}
+	sender := message.NewSender(client.API())
+	inputPeer, err := sender.Resolve(messageDeepLink.Username).AsInputPeer(ctx)
+	if err != nil {
+		return fmt.Errorf("can't get as input peer: %w", err)
+	}
+	builder := sender.Resolve(destinationChannelUsername)
+	_, err = builder.Join(ctx)
+	if err != nil {
+		return fmt.Errorf("can't join channel %s: %w", destinationChannelUsername, err)
+	}
+	_, err = builder.ForwardIDs(inputPeer, messageDeepLink.MessageID).Send(ctx)
+	if err != nil {
+		return fmt.Errorf("can't forward message to %s: %w", destinationChannelUsername, err)
+	}
+	return nil
+}
