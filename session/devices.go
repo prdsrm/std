@@ -36,6 +36,7 @@ var f embed.FS
 func Windows() telegram.DeviceConfig {
 	sessionJson, _ := f.ReadFile("devices.json")
 	var sessionStruct Devices
+	// not handling error because this file is embedded, so it will work.
 	json.Unmarshal(sessionJson, &sessionStruct)
 
 	systemVersion := sessionStruct.Tdesktop.SystemVersions[rand.Intn(len(sessionStruct.Tdesktop.SystemVersions))]
