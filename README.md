@@ -21,6 +21,7 @@ Telegram helper library and tools, tailored for bot & channel automation, groups
   - **Examples**: monitor newly listed tokens on [DexScreener](https://dexscreener.com), [check out the code](https://github.com/prdsrm/std/blob/main/examples/dslisting/main.go).
 - Common helpers for [gotd](https://github.com/gotd/td)
   - Create shareable folders(<https://t.me/addlist/random>), export chats in them, join them.
+	- Scrape similar channels, export them into a Maltego file
   - Join channel, add views, reactions, create channels and groups, promote & demote members, add members to your channel, easily.
   - Automate posting in your channel.
   - Export all members from a channel you own.
@@ -33,6 +34,47 @@ go get github.com/prdsrm/std
 ```
 
 ## Usage
+
+Scrape similar channels example, (here, we get the channels similar to Pavel Durov personal channel):
+```go
+
+package main
+
+import (
+	"context"
+	"fmt"
+	"log"
+
+	examples "github.com/gotd/td/examples"
+	"github.com/gotd/td/telegram"
+	"github.com/gotd/td/telegram/auth"
+	"github.com/gotd/td/tg"
+
+	"github.com/prdsrm/std/channels"
+	"github.com/prdsrm/std/session"
+)
+
+func run(ctx context.Context, client *telegram.Client, dispatcher tg.UpdateDispatcher, options telegram.Options) error {
+	channels, err := channels.GetSimilarChannels(ctx, client, "durov")
+	if err != nil {
+		return err
+	}
+	for _, channel := range channels {
+		fmt.Println("Channel: ", channel.ID, channel.Username)
+	}
+	return nil
+}
+
+func main() {
+	authOpt := auth.SendCodeOptions{}
+	flow := auth.NewFlow(examples.Terminal{}, authOpt)
+	err := session.Connect(run, session.Windows(), 2040, "b18441a1ff607e10a989891a5462e627", "", "", flow)
+	if err != nil {
+		log.Fatalln("can't connect: ", err)
+	}
+}
+```
+You can run this example, just create a `main.go` file, and install the library with `go get`, then run `go run`.
 
 Bot automation example, extracting KOLs data from <https://t.me/spydefi_bot>:
 
