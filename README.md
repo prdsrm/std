@@ -21,7 +21,7 @@ Telegram helper library and tools, tailored for bot & channel automation, groups
   - **Examples**: monitor newly listed tokens on [DexScreener](https://dexscreener.com), [check out the code](https://github.com/prdsrm/std/blob/main/examples/dslisting/main.go).
 - Common helpers for [gotd](https://github.com/gotd/td)
   - Create shareable folders(<https://t.me/addlist/random>), export chats in them, join them.
-	- Scrape similar channels, export them into a Maltego file
+  - Scrape similar channels, export them into a Maltego file
   - Join channel, add views, reactions, create channels and groups, promote & demote members, add members to your channel, easily.
   - Automate posting in your channel.
   - Export all members from a channel you own.
