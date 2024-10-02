@@ -23,6 +23,8 @@
           golangci-lint
           gopls
           delve
+          # Postgres
+          go-migrate
         ];
       };
     });
