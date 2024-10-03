@@ -26,6 +26,9 @@ Telegram helper library and tools, tailored for bot & channel automation, groups
   - Automate posting in your channel.
   - Export all members from a channel you own.
 
+Some features are missing, don't hesitate to check out https://github.com/users/prdsrm/projects/3,
+and the CONTRIBUTING.md file, if you want to contribute to the project!
+
 ## Installation
 
 Run the following in your Go project:
@@ -141,23 +144,12 @@ func listen(ctx context.Context, client *telegram.Client, dispatcher tg.UpdateDi
 	if err != nil {
 		return err
 	}
-	// Here is an example, on how to use custom TG parameters to start the bot, like for this URL:
-	// https://t.me/SpyDefi_bot?start=tggemarcheologisttelegram-1001942713434
-	// This channel is fully arbitrary, I'm not a crypto trader, I just do programming, I selected
-	// it from the t.me/spydefi channel, randomly.
 	fmt.Println("Sending start message with params")
+	// NOTE: channel is completely random.
 	err = automation.SendStartMessageWithParams("tggemarcheologisttelegram-1001942713434")
 	if err != nil {
 		return err
 	}
-	// NOTE: you can also do it like this:
-	// username := "LeclercCalls"
-	// // ^ same, this channel has been taken randomly, from my scraped database, because it has some good "KOL".
-	// err = automation.SendTextMessage("/start")
-	// err = automation.SendTextMessage(fmt.Sprintf("/checkstats @%s", username))
-	// if err != nil {
-	// 	return err
-	// }
 	automation.Handle(re, saveSpydefiChannelData)
 	err = automation.Listen()
 	if err != nil {
@@ -187,4 +179,4 @@ Please make sure to update tests as appropriate.
 
 ## License
 
-BSD-3-Clause license, because FreeBSD & OpenBSD is great
+BSD-3-Clause license, because FreeBSD is great

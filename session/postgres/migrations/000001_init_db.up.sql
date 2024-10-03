@@ -5,8 +5,6 @@ CREATE TABLE bots (
     username character varying(32) DEFAULT ''::character varying NOT NULL,
     password character varying(64) DEFAULT ''::character varying NOT NULL,
     title character varying(64) DEFAULT 'A'::character varying NOT NULL,
-    creation_date date DEFAULT (CURRENT_DATE - 30) NOT NULL,
-    license character varying(36),
     premium boolean DEFAULT false
 );
 
