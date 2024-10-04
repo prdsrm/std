@@ -32,6 +32,14 @@ func InsertNewBot(
 	return nil
 }
 
+func DeleteBotByUserID(db *sqlx.DB, botUserID int64) error {
+	_, err := db.Exec("DELETE FROM bots WHERE user_id=$1", botUserID)
+	if err != nil {
+		return err
+	}
+	return err
+}
+
 func GetBotByUserID(db *sqlx.DB, botUserID int64) (*Bot, error) {
 	bot := Bot{}
 	err := db.Get(&bot, "SELECT * FROM bots WHERE user_id=$1", botUserID)
@@ -74,4 +82,12 @@ func InsertNewDevice(db *sqlx.DB, userID int64, apiID int, apiHash string, sessi
 		return err
 	}
 	return nil
+}
+
+func DeleteDeviceBySessionString(db *sqlx.DB, session string) error {
+	_, err := db.Exec("DELETE FROM bots WHERE session_string=$1", session)
+	if err != nil {
+		return err
+	}
+	return err
 }
