@@ -87,12 +87,12 @@ func OpenDBConnection() (*sqlx.DB, error) {
 	return db, nil
 }
 
-func ConnectToBotFromDatabase(db *sqlx.DB, botModel Bot, f func(ctx context.Context, client *telegram.Client, dispatcher tg.UpdateDispatcher, options telegram.Options) error, phone string, password string) error {
+func ConnectToBotFromDatabase(db *sqlx.DB, botModel Bot, f func(ctx context.Context, client *telegram.Client, dispatcher tg.UpdateDispatcher, options telegram.Options) error) error {
 	device, err := GetDevice(db, botModel.UserID)
 	if err != nil {
 		return err
 	}
-	flow := session.GetNewDefaultAuthConversator(phone, password)
+	flow := session.GetNewDefaultAuthConversator(botModel.PhoneNumber, botModel.Password)
 	err = session.Connect(f, session.Windows(), device.ApiID, device.ApiHash, device.SessionString, device.Proxy.String, flow)
 	if err != nil {
 		return err
