@@ -4,12 +4,12 @@ import (
 	"context"
 	"embed"
 	"fmt"
+	"log"
 	"os"
 	"time"
 
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
-	"go.uber.org/zap"
 
 	"github.com/gotd/td/telegram"
 	"github.com/gotd/td/tg"
@@ -43,7 +43,7 @@ func GetEnvVariable(name string) (string, error) {
 var fs embed.FS
 
 // OpenDBConnection func for opening database connection.
-func OpenDBConnection(log *zap.Logger) (*sqlx.DB, error) {
+func OpenDBConnection() (*sqlx.DB, error) {
 	// Define database connection for PostgreSQL.
 	connStr, err := GetEnvVariable("DATABASE_URL")
 	if err != nil {
@@ -69,24 +69,20 @@ func OpenDBConnection(log *zap.Logger) (*sqlx.DB, error) {
 	// Run migrations scripts
 	d, err := iofs.New(fs, "migrations")
 	if err != nil {
-		log.Fatal("Couldn't find migrations on disk.", zap.Error(err))
+		log.Fatalln("Couldn't find migrations on disk.", err)
 	}
 	m, err := migrate.NewWithSourceInstance("iofs", d, connStr)
 	if err != nil {
-		log.Fatal("Couldn't start a new migrator.", zap.Error(err))
+		log.Fatalln("Couldn't start a new migrator.", err)
 	}
 	err = m.Up()
 	if err != nil && err.Error() != "no change" {
 		return nil, err
 	}
-	version, dirty, err := m.Version()
+	_, _, err = m.Version()
 	if err != nil {
-		log.Fatal("Couldn't get database version.", zap.Error(err))
+		log.Fatalln("Couldn't get database version.", err)
 	}
-	if dirty {
-		log.Fatal("Database is dirty.")
-	}
-	log.Info("Checking version.", zap.Uint("version", version))
 
 	return db, nil
 }

@@ -25,6 +25,7 @@
           delve
           # Postgres
           go-migrate
+          postgresql_16
         ];
       };
     });
