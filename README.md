@@ -13,6 +13,7 @@ Telegram helper library and tools, tailored for bot & channel automation, groups
   - allows converting a Telethon SQLite Session, or TDATA session, to a Telethon string session
   - export all of your sessions to Telethon string session
   - **Examples**: [simply generate a telethon string session for your account, with manual login, or an existing SQLite / TDATA session](https://github.com/prdsrm/std/blob/main/cmd/generate/main.go)
+		Or, [use the postgres back-end to connect to an account, and manage your sessions](https://github.com/prdsrm/std/blob/main/examples/postgres/main.go).
 - Telegram bot automation helpers
   - Structured object in order to automate Telegram bot.
   - **Examples**: scrape data from [SpyDefi Bot](https://docs.spydefi.org/spydefi-docs/spydefi-guides/how-to-use-spydefi/spydefi-bot), [check out the code](https://github.com/prdsrm/std/blob/main/examples/spydefi/main.go).
