@@ -49,10 +49,10 @@ func GetBotByUserID(db *sqlx.DB, botUserID int64) (*Bot, error) {
 	return &bot, nil
 }
 
-func GetDevice(db *sqlx.DB, botUserID int64) (*Device, error) {
+func GetRandomDevice(db *sqlx.DB, botUserID int64) (*Device, error) {
 	device := Device{}
-	query := `SELECT * FROM devices WHERE bot_user_id=$1 LIMIT 1`
-	err := db.Select(&device, query, botUserID)
+	query := `SELECT * FROM devices WHERE bot_user_id=$1 ORDER BY RANDOM() LIMIT 1`
+	err := db.Get(&device, query, botUserID)
 	if err != nil {
 		return nil, err
 	}
