@@ -6,6 +6,7 @@ import (
 	"log"
 	"regexp"
 
+	"github.com/gotd/td/telegram"
 	"github.com/gotd/td/tg"
 
 	"github.com/prdsrm/std/utils"
@@ -54,7 +55,13 @@ func (a *Monitoring) SetupMessageMonitoring(messagesChan chan *tg.Message) {
 }
 
 type MonitoringContext struct {
-	m *tg.Message
+	Ctx context.Context
+	c   *telegram.Client
+	m   *tg.Message
+}
+
+func (m *MonitoringContext) GetClient() *telegram.Client {
+	return m.c
 }
 
 func (m *MonitoringContext) GetMessage() *tg.Message {
@@ -74,7 +81,7 @@ func (m *Monitoring) Handle(re *regexp.Regexp, handler func(ctx MonitoringContex
 	m.routes = append(m.routes, RouteEntry{Regex: re, Handler: handler})
 }
 
-func (m *Monitoring) Listen() error {
+func (m *Monitoring) Listen(ctx context.Context, client *telegram.Client) error {
 	messagesChan := make(chan *tg.Message)
 	m.SetupMessageMonitoring(messagesChan)
 	for {
@@ -82,7 +89,9 @@ func (m *Monitoring) Listen() error {
 		id := utils.GetIDFromPeerClass(msg.PeerID)
 		if id == m.id {
 			ctx := MonitoringContext{
-				m: msg,
+				Ctx: ctx,
+				m:   msg,
+				c:   client,
 			}
 			text := msg.Message
 			if m.strip {
