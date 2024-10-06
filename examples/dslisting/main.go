@@ -82,7 +82,7 @@ func listen(ctx context.Context, client *telegram.Client, dispatcher tg.UpdateDi
 	}
 	monitoring.Handle(re, ParseDSNewPair)
 	log.Println("Starting to listen for new dexscreener listings")
-	err = monitoring.Listen()
+	err = monitoring.Listen(ctx, client)
 	if err != nil {
 		return err
 	}

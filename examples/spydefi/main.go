@@ -78,7 +78,7 @@ func listen(ctx context.Context, client *telegram.Client, dispatcher tg.UpdateDi
 	// 	return err
 	// }
 	automation.Handle(re, saveSpydefiChannelData)
-	err = automation.Listen()
+	err = automation.Listen(ctx, client)
 	if err != nil {
 		return err
 	}

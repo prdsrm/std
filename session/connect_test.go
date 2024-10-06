@@ -31,7 +31,7 @@ func callSelf(ctx context.Context, client *telegram.Client, dispatcher tg.Update
 		return err
 	}
 	automation.Handle(regexp.MustCompile(".*"), defaultHandler)
-	err = automation.Listen()
+	err = automation.Listen(ctx, client)
 	if err != nil {
 		return err
 	}
