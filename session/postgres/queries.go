@@ -19,12 +19,10 @@ func InsertNewBot(
                 username,
                 password,
                 user_id,
-				title,
-				creation_date,
-				license
+				title
               )
             VALUES
-              ($1, $2, $3, $4, $5, $6, $7);
+              ($1, $2, $3, $4, $5);
 		`, phone, username, password, userID, title)
 	if err != nil {
 		return err
