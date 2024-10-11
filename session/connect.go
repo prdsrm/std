@@ -4,13 +4,13 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"golang.org/x/net/proxy"
 	"golang.org/x/time/rate"
-	"net/url"
+	"log"
 	"sync"
 	"time"
 
 	"github.com/gotd/td/session"
+	"github.com/prdsrm/std/utils"
 
 	"github.com/gotd/contrib/middleware/floodwait"
 	"github.com/gotd/contrib/middleware/ratelimit"
@@ -55,31 +55,6 @@ func (s *MemorySession) StoreSession(ctx context.Context, data []byte) error {
 	return nil
 }
 
-func newDialer(proxyConnStr string) (proxy.Dialer, error) {
-	url, err := url.Parse(proxyConnStr)
-	if err != nil {
-		return nil, err
-	}
-	socks5, err := proxy.FromURL(url, proxy.Direct)
-	if err != nil {
-		return nil, err
-	}
-	return socks5, nil
-}
-
-func newResolver(proxyConnStr string) (dcs.Resolver, error) {
-	var resolver dcs.Resolver
-	socks5, err := newDialer(proxyConnStr)
-	if err != nil {
-		return nil, err
-	}
-	dc := socks5.(proxy.ContextDialer)
-	resolver = dcs.Plain(dcs.PlainOptions{
-		Dial: dc.DialContext,
-	})
-	return resolver, nil
-}
-
 func GetNewDefaultAuthConversator(phone string, password string) auth.Flow {
 	userAuthenticator := DefaultAuthConversator{PhoneNumber: phone, Passwd: password}
 	authOpt := auth.SendCodeOptions{}
@@ -107,7 +82,7 @@ func Connect(f func(ctx context.Context, client *telegram.Client, dispatcher tg.
 	var resolver dcs.Resolver
 	var err error
 	if proxy != "" {
-		resolver, err = newResolver(proxy)
+		resolver, err = utils.NewResolver(proxy)
 		if err != nil {
 			return err
 		}
@@ -158,6 +133,15 @@ func runClient(f func(ctx context.Context, client *telegram.Client, dispatcher t
 			if err := client.Auth().IfNecessary(ctx, flow); err != nil {
 				return fmt.Errorf("could not authenticate: %w", err)
 			}
+			// In the telegram/connect.go, line 31, we can see that the client.Run helper does not correctly check
+			// for the session authorization.
+			// It doesn't return anything if its unauthorized, it doesn't log, because its in a goroutine. We need to check ourselves.
+			self, err := client.Self(ctx)
+			if !auth.IsUnauthorized(err) {
+				log.Println("error, returning")
+				return fmt.Errorf("could not authenticate, client is not authorized: %w", err)
+			}
+			log.Println("Logged in to account", self.ID, self.FirstName, self.LastName)
 		}
 		if err := f(ctx, client, dispatcher, options); err != nil {
 			return err

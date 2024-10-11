@@ -3,11 +3,13 @@ package utils
 import (
 	"errors"
 	"fmt"
+	"golang.org/x/net/proxy"
 	"net/url"
 	"strconv"
 	"strings"
 	"unicode"
 
+	"github.com/gotd/td/telegram/dcs"
 	"github.com/gotd/td/tg"
 )
 
@@ -67,4 +69,29 @@ func RemoveSpacesAndNewlines(s string) string {
 		return -1
 	}, s)
 	return strings.Join(strings.Fields(cleanText), "")
+}
+
+func NewDialer(proxyConnStr string) (proxy.Dialer, error) {
+	url, err := url.Parse(proxyConnStr)
+	if err != nil {
+		return nil, err
+	}
+	socks5, err := proxy.FromURL(url, proxy.Direct)
+	if err != nil {
+		return nil, err
+	}
+	return socks5, nil
+}
+
+func NewResolver(proxyConnStr string) (dcs.Resolver, error) {
+	var resolver dcs.Resolver
+	socks5, err := NewDialer(proxyConnStr)
+	if err != nil {
+		return nil, err
+	}
+	dc := socks5.(proxy.ContextDialer)
+	resolver = dcs.Plain(dcs.PlainOptions{
+		Dial: dc.DialContext,
+	})
+	return resolver, nil
 }
