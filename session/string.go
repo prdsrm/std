@@ -14,7 +14,6 @@ import (
 	"github.com/gotd/td/session"
 	"github.com/gotd/td/session/tdesktop"
 	"github.com/gotd/td/telegram/dcs"
-	"go.uber.org/zap"
 
 	"github.com/jmoiron/sqlx"
 	_ "github.com/mattn/go-sqlite3"
@@ -29,7 +28,6 @@ type SQLiteSession struct {
 }
 
 func ConvertSQLiteSessionToTelethonStringSession(
-	log *zap.Logger,
 	sessionPath string,
 ) (string, error) {
 	db, err := sqlx.Connect("sqlite3", sessionPath)
@@ -50,16 +48,14 @@ func ConvertSQLiteSessionToTelethonStringSession(
 	return stringSession, nil
 }
 
-func ConvertTDATAToTelethonStringSession(log *zap.Logger, dirname string) (string, error) {
+func ConvertTDATAToTelethonStringSession(dirname string) (string, error) {
 	accounts, err := tdesktop.Read(dirname, nil)
 	if err != nil {
-		log.Error("Can't read account.", zap.Error(err))
 		return "", err
 	}
 	for _, account := range accounts {
 		sd, err := session.TDesktopSession(account)
 		if err != nil {
-			log.Error("Can't get session data.", zap.Error(err))
 			return "", err
 		}
 		addr := strings.Split(sd.Addr, " ")
