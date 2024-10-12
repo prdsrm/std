@@ -8,6 +8,11 @@ import (
 	"github.com/gotd/td/telegram"
 )
 
+const (
+	TdesktopApiID   = 2040
+	TdesktopApiHash = "b18441a1ff607e10a989891a5462e627"
+)
+
 type Devices struct {
 	Tdesktop struct {
 		ApiID          int      `json:"api_id"`
