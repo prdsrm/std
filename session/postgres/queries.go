@@ -38,6 +38,16 @@ func DeleteBotByUserID(db *sqlx.DB, botUserID int64) error {
 	return err
 }
 
+func GetAllBots(db *sqlx.DB) ([]Bot, error) {
+	var bots []Bot
+	query := `SELECT * FROM bots`
+	err := db.Select(&bots, query)
+	if err != nil {
+		return nil, err
+	}
+	return bots, nil
+}
+
 func GetBotByUserID(db *sqlx.DB, botUserID int64) (*Bot, error) {
 	bot := Bot{}
 	err := db.Get(&bot, "SELECT * FROM bots WHERE user_id=$1", botUserID)
