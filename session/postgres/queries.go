@@ -48,6 +48,16 @@ func GetAllBots(db *sqlx.DB) ([]Bot, error) {
 	return bots, nil
 }
 
+func GetRandomBot(db *sqlx.DB) (*Bot, error) {
+	bot := Bot{}
+	query := `SELECT * FROM bots ORDER BY RANDOM() LIMIT 1`
+	err := db.Get(&bot, query)
+	if err != nil {
+		return nil, err
+	}
+	return &bot, nil
+}
+
 func GetBotByUserID(db *sqlx.DB, botUserID int64) (*Bot, error) {
 	bot := Bot{}
 	err := db.Get(&bot, "SELECT * FROM bots WHERE user_id=$1", botUserID)
