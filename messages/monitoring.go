@@ -115,3 +115,55 @@ func (m *Monitoring) Listen(ctx context.Context, client *telegram.Client) error 
 		}
 	}
 }
+
+// MonitorMessages accepts a function to process the message along with the chatID of the channel
+// from which it was received.
+// This function is deprecated please use the `Monitoring` class for simplicity.
+func MonitorMessages(ctx context.Context, client *telegram.Client, dispatcher tg.UpdateDispatcher, work func(chatID int64, m *tg.Message) error, done chan bool) {
+	dispatcher.OnEditMessage(func(ctx context.Context, e tg.Entities, update *tg.UpdateEditMessage) error {
+		switch m := update.Message.(type) {
+		case *tg.Message:
+			chatID := utils.GetIDFromPeerClass(m.PeerID)
+			err := work(chatID, m)
+			if err != nil {
+				return err
+			}
+		}
+		return nil
+	})
+	dispatcher.OnNewMessage(func(ctx context.Context, entities tg.Entities, u *tg.UpdateNewMessage) error {
+		switch m := u.Message.(type) {
+		case *tg.Message: // message#2357bf25
+			m, ok := u.Message.(*tg.Message)
+			if !ok || m.Out {
+				// Outgoing message, not interesting.
+				return nil
+			}
+			chatID := utils.GetIDFromPeerClass(m.PeerID)
+			err := work(chatID, m)
+			if err != nil {
+				return err
+			}
+		}
+		return nil
+	})
+	dispatcher.OnNewChannelMessage(func(ctx context.Context, entities tg.Entities, u *tg.UpdateNewChannelMessage) error {
+		switch m := u.Message.(type) {
+		case *tg.MessageEmpty: // messageEmpty#90a6ca84
+		case *tg.Message: // message#2357bf25
+			if m.Out {
+				// Outgoing message, not interesting.
+				return nil
+			}
+			chatID := utils.GetIDFromPeerClass(m.PeerID)
+			err := work(chatID, m)
+			if err != nil {
+				return err
+			}
+		case *tg.MessageService: // messageService#2b085862
+		}
+
+		return nil
+	})
+	<-done
+}
