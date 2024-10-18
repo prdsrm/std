@@ -122,8 +122,9 @@ func Connect(f func(ctx context.Context, client *telegram.Client, dispatcher tg.
 
 func runClient(f func(ctx context.Context, client *telegram.Client, dispatcher tg.UpdateDispatcher, options telegram.Options) error, ctx context.Context, client *telegram.Client, dispatcher tg.UpdateDispatcher, options telegram.Options, flow auth.Flow) error {
 	if err := client.Run(ctx, func(ctx context.Context) error {
+		authCli := client.Auth()
 		// Checking auth status.
-		status, err := client.Auth().Status(ctx)
+		status, err := authCli.Status(ctx)
 		if err != nil {
 			return err
 		}
@@ -137,9 +138,11 @@ func runClient(f func(ctx context.Context, client *telegram.Client, dispatcher t
 			// for the session authorization.
 			// It doesn't return anything if its unauthorized, it doesn't log, because its in a goroutine. We need to check ourselves.
 			self, err := client.Self(ctx)
-			if !auth.IsUnauthorized(err) {
-				log.Println("error, returning")
-				return fmt.Errorf("could not authenticate, client is not authorized: %w", err)
+			if err != nil {
+				if auth.IsUnauthorized(err) {
+					return fmt.Errorf("could not authenticate, client is not authorized: %w", err)
+				}
+				return err
 			}
 			log.Println("Logged in to account", self.ID, self.FirstName, self.LastName)
 		}
