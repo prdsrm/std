@@ -1,7 +1,6 @@
 package postgres
 
 import (
-	"context"
 	"embed"
 	"fmt"
 	"log"
@@ -11,15 +10,10 @@ import (
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
 
-	"github.com/gotd/td/telegram"
-	"github.com/gotd/td/tg"
-
 	"github.com/golang-migrate/migrate/v4"
 	_ "github.com/golang-migrate/migrate/v4/database/postgres"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 	"github.com/golang-migrate/migrate/v4/source/iofs"
-
-	"github.com/prdsrm/std/session"
 )
 
 const (
@@ -85,17 +79,4 @@ func OpenDBConnection() (*sqlx.DB, error) {
 	}
 
 	return db, nil
-}
-
-func ConnectToBotFromDatabase(db *sqlx.DB, botModel *Bot, f func(ctx context.Context, client *telegram.Client, dispatcher tg.UpdateDispatcher, options telegram.Options) error) error {
-	device, err := GetRandomDevice(db, botModel.UserID)
-	if err != nil {
-		return err
-	}
-	flow := session.GetNewDefaultAuthConversator(botModel.PhoneNumber, botModel.Password)
-	err = session.Connect(f, session.Windows(), device.ApiID, device.ApiHash, device.SessionString, device.Proxy.String, flow)
-	if err != nil {
-		return err
-	}
-	return nil
 }
