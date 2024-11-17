@@ -27,7 +27,11 @@ func main() {
 	if err != nil {
 		log.Fatalln("user ID is not an integer: ", err)
 	}
-	db, err := postgres.OpenDBConnection()
+	connStr, exists := os.LookupEnv("DATABASE_URL")
+	if !exists {
+		log.Fatalln("DATABASE_URL is not set")
+	}
+	db, err := postgres.OpenDBConnection(connStr)
 	if err != nil {
 		log.Fatalln("can't connect to database: ", err)
 	}

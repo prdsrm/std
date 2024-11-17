@@ -4,7 +4,6 @@ import (
 	"embed"
 	"fmt"
 	"log"
-	"os"
 	"time"
 
 	"github.com/jmoiron/sqlx"
@@ -25,26 +24,12 @@ const (
 	MaxLifetimeConn = 0
 )
 
-func GetEnvVariable(name string) (string, error) {
-	env, exists := os.LookupEnv(name)
-	if !exists {
-		return "", fmt.Errorf("Please set the %s environment variable", name)
-	}
-	return env, nil
-}
-
 //go:embed migrations/*.sql
 var fs embed.FS
 
 // OpenDBConnection func for opening database connection.
-func OpenDBConnection() (*sqlx.DB, error) {
-	// Define database connection for PostgreSQL.
-	connStr, err := GetEnvVariable("DATABASE_URL")
-	if err != nil {
-		return nil, err
-	}
-
-	db, err := sqlx.Connect("postgres", connStr)
+func OpenDBConnection(databaseURL string) (*sqlx.DB, error) {
+	db, err := sqlx.Connect("postgres", databaseURL)
 	if err != nil {
 		return nil, fmt.Errorf("error, not connected to database, %w", err)
 	}
@@ -65,7 +50,7 @@ func OpenDBConnection() (*sqlx.DB, error) {
 	if err != nil {
 		log.Fatalln("Couldn't find migrations on disk.", err)
 	}
-	m, err := migrate.NewWithSourceInstance("iofs", d, connStr)
+	m, err := migrate.NewWithSourceInstance("iofs", d, databaseURL)
 	if err != nil {
 		log.Fatalln("Couldn't start a new migrator.", err)
 	}
