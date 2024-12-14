@@ -25,12 +25,12 @@ type BotAndEntityRelationship struct {
 }
 
 type Bot struct {
-	UserID      int64  `db:"user_id"`
-	PhoneNumber string `db:"phone_number"`
-	Username    string `db:"username"`
-	Password    string `db:"password"`
-	Title       string `db:"title"`
-	Premium     bool   `db:"premium"`
+  UserID      int64  `db:"user_id" json:"user_id"`
+  PhoneNumber string `db:"phone_number" json:"phone_number"`
+  Username    string `db:"username" json:"username"`
+  Password    string `db:"password" json:"password"`
+  Title       string `db:"title" json:"title"`
+  Premium     bool   `db:"premium" json:"premium"`
 }
 
 type Device struct {
